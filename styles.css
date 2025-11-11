@@ -57,9 +57,41 @@ h1 {
   gap: 0.35rem;
 }
 
-/* simple utility to hide the input group until selection */
+/* animate only the text input group (#textGroup) when shown/hidden */
+#textGroup {
+  /* allow smooth fade / slide animation */
+  transition: opacity 200ms ease, transform 200ms ease, max-height 220ms ease, visibility 200ms;
+  will-change: opacity, transform, max-height;
+  max-height: 220px; /* enough for the label + input */
+  overflow: hidden;
+}
+
+/* small note shown above the input */
+.input-note {
+  font-size: 0.85rem;
+  color: #444;
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 200ms ease, transform 200ms ease;
+  min-height: 1.2em; /* preserve layout when empty */
+}
+
+/* when the group is visible, show the note */
+#textGroup:not(.hidden) .input-note {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* simple utility to hide the input group until selection (animated) */
 .hidden {
-  display: none;
+  opacity: 0;
+  transform: translateY(-8px);
+  max-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 label {
