@@ -9,12 +9,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const secretDiv = document.getElementById("secretDiv");
 
   const notes = {
-    andrea: "Perchè hai scelto Andrea? Che cazzo vuoi? Scegli il tuo nome, levati dalle palle",
+    andrea: "Perchè hai scelto me? Che cazzo vuoi? Scegli il tuo nome e levati dalle palle",
     dario: "A zi guarda che bello fare front end dio cane",
     stefano: "Avvocato speriamo che Lautaro si fa il crociato",
     bruno: "Ah, Bruno, il macinapepe degli dei. Leggende narrano che abbia sgrullato le palle anche a Crono, e per quello fu segregato nel Tartaro. Gasi.",
     mocu: "ou mocu",
-    ciccio: "Francese del cazzo. Tra l'altro Francese e Francesco solo molto simili. Magari avere il culo sporco era il tuo destino?",
+    ciccio: "Francese del cazzo. Tra l'altro Francese e Francesco sono molto simili. Magari avere il culo sporco era il tuo destino?",
     ettore: "Il compare, grande sognatore di totalitarismi e pulizia etnica. Certo, poi quando segna Zambo Anguissa gode. La coerenza...",
     alessia: "Si, ti ho messa per ultima perchè le femmine stanno in fondo. Stacci."
   };
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
       usersMap = await res.json();
     } catch {
       usersMap = {};
-      console.warn("Could not load users.json or file missing; password verification will fail.");
+      console.warn("err pass");
     }
   }
 
@@ -64,10 +64,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const hasPassword = Object.prototype.hasOwnProperty.call(usersMap, val);
 
     // restore custom note text from the notes map (if any) and show status
-    const notePrefix = notes[val] ? notes[val] + " " : "";
-    inputNote.textContent = hasPassword
-      ? notePrefix + "Password presente — inserisci la password per accedere."
-      : notePrefix + "Nessuna password disponibile per questo utente (impossibile impostarne una qui).";
+    // show custom note on its own line, status on the next line
+    const noteText = notes[val] ? notes[val] : "";
+    const statusText = hasPassword
+      ? "Metti la password che t'ho dato. Tanto lo so che ora devi tornare su whatsapp perchè non te la ricordi, c'hai la memoria di un criceto dio"
+      : "Nessuna password disponibile per questo utente (impossibile impostarne una qui).";
+    if (noteText) {
+      inputNote.innerHTML = `${noteText}<br><span class="note-status">${statusText}</span>`;
+    } else {
+      inputNote.textContent = statusText;
+    }
     inputNote.setAttribute("aria-hidden", "false");
 
     // if there's a password defined in users.json allow the user to input it
@@ -75,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
       inputGroup.classList.remove("hidden");
       inputEl.disabled = false;
       inputEl.value = "";
-      inputEl.placeholder = "Inserisci la password...";
+      inputEl.placeholder = "Ti sbrighi?";
       submitBtn.disabled = false;
       inputEl.focus();
     } else {
