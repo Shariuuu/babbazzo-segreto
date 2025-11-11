@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const selectEl = document.getElementById("choiceSelect");
-  const inputEl = document.getElementById("textInput");
+  const selectEl = document.getElementById("name");
+  const inputEl = document.getElementById("password");
   const inputGroup = document.getElementById("textGroup");
   const inputNote = document.getElementById("inputNote");
   const formEl = document.getElementById("mainForm");
@@ -13,11 +13,102 @@ document.addEventListener("DOMContentLoaded", () => {
     dario: "A zi guarda che bello fare front end dio cane",
     stefano: "Avvocato speriamo che Lautaro si fa il crociato",
     bruno: "Ah, Bruno, il macinapepe degli dei. Leggende narrano che abbia sgrullato le palle anche a Crono, e per quello fu segregato nel Tartaro. Gasi.",
-    mocu: "ou mocu",
+    mocu: "ou mocu, t'appost? Ti ho visto al telegiornale, freschissimo",
     ciccio: "Francese del cazzo. Tra l'altro Francese e Francesco sono molto simili. Magari avere il culo sporco era il tuo destino?",
     ettore: "Il compare, grande sognatore di totalitarismi e pulizia etnica. Certo, poi quando segna Zambo Anguissa gode. La coerenza...",
     alessia: "Si, ti ho messa per ultima perchè le femmine stanno in fondo. Stacci."
   };
+
+  const encryptedAssignments = {
+  "andrea": "PlE28l83p8qIg6DlzxVqvA9mPuG/wrgGrphVA/uIB+HnL5s27x2ES7PhfLlkhPp9NN0ZW3/ha/h76zvoqeS3x0IjOpb7DLhQ",
+  "dario": "vn2uyeXC53eOFMMUJN9gcyGr/XrBOyuNSYP/dCtFVZFX//93yyBqzoK5RKziyvCguURTX645Iwo9v2ZqFWQUY5p962q5EKtkyA==",
+  "stefano": "teu5fhzXU/N7ip9Tm0AzE+Je1t1EsTWM7dqjULai7Z7a0P1bHts2GBTNpj3v3WMAZO94ysyFRYuSG2LHb9SIvDvn/4nUd/fs",
+  "bruno": "Ok7Amrr6dvuoClZoSfMnZSAQPOzwk+i2WndHKecBDZWGLvDAXolguxVurtxrZyNVQrkFJ2WHucPZUi0lnmoTEMoNYkr9b7B9DA==",
+  "mocu": "36sZCio0TQhOe3vvl/zXKjEcnVXo8kRvbJB78HwlZ+qpRxJGmjtGHvN8YPJEvlBl//CY13teqnFDvScVqKO9pXwu6LT4HpmASw==",
+  "ciccio": "sb/HNUmpJScwS7Uv66+3yLJPmWO1JYeHKj599Iah8jnSNtoANvY63nGPA6iIC/n0FXxR2PjD1l1cl6L4s1fTCx9Q/NrOBlXTzBw=",
+  "ettore": "11nXZP6ltZZOdwO01MERsRA44YsFyBrqIGEVtMMUzUOU7u4YoeRR9FbD6kmIxqDvufWHQUazPmdupuob7HGRtmYc/d4t+qdDhY4=",
+  "alessia": "N75slmPX8W7KC4b0R8BmFCimvrismN+0flo7yXnsd0vAzW4X43nZp7/vPMT2d/jJZdU9b9eDlhsy+ek2RZjzVQ7rxWOidzQ="
+};
+
+const textEncoder = new TextEncoder();
+const textDecoder = new TextDecoder();
+
+function base64ToBytes(b64) {
+  const binStr = atob(b64);
+  const bytes = new Uint8Array(binStr.length);
+  for (let i = 0; i < binStr.length; i++) {
+    bytes[i] = binStr.charCodeAt(i);
+  }
+  return bytes;
+}
+
+async function deriveKeyFromPassword(password, salt) {
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    textEncoder.encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveKey"]
+  );
+  const key = await crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt,
+      iterations: 200000,
+      hash: "SHA-256"
+    },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt"]
+  );
+  return key;
+}
+
+async function decryptAssignment(base64Data, password) {
+  const data = base64ToBytes(base64Data);
+  const salt = data.slice(0, 16);
+  const iv   = data.slice(16, 28);
+  const ct   = data.slice(28);
+
+  const key = await deriveKeyFromPassword(password, salt);
+  const plainBuffer = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv },
+    key,
+    ct
+  );
+  return textDecoder.decode(plainBuffer); // es. "Devi fare il regalo a: Elena"
+}
+
+document.getElementById("goBtn").addEventListener("click", async () => {
+  const name = document.getElementById("name").value;
+  const pwd  = document.getElementById("password").value;
+  const resultEl = document.getElementById("result");
+  resultEl.textContent = "";
+  resultEl.className = "";
+
+  if (!name || !pwd) {
+    resultEl.textContent = "Compila nome e password.";
+    resultEl.className = "error";
+    return;
+  }
+
+  const enc = encryptedAssignments[name];
+  if (!enc) {
+    resultEl.textContent = "Nome non valido.";
+    resultEl.className = "error";
+    return;
+  }
+
+  try {
+    const msg = await decryptAssignment(enc, pwd);
+    resultEl.textContent = msg;
+  } catch (e) {
+    console.error(e);
+    resultEl.textContent = "Password errata o dati corrotti.";
+    resultEl.className = "error";
+  }
+});
 
   // store users/passwords loaded from users.json
   let usersMap = {};
@@ -70,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ? "Metti la password che t'ho dato. Tanto lo so che ora devi tornare su whatsapp perchè non te la ricordi, c'hai la memoria di un criceto dio"
       : "Nessuna password disponibile per questo utente (impossibile impostarne una qui).";
     if (noteText) {
-      inputNote.innerHTML = `${noteText}<br><span class="note-status">${statusText}</span>`;
+      inputNote.innerHTML = `${noteText}<br/><br/><br/><span class="note-status">${statusText}</span>`;
     } else {
       inputNote.textContent = statusText;
     }

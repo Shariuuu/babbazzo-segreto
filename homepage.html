@@ -15,8 +15,8 @@
       <form id="mainForm" class="form" autocomplete="off">
         <!-- Picklist -->
         <div class="form-group">
-          <label for="choiceSelect">Ritardato:</label>
-          <select id="choiceSelect" name="choice" required>
+          <label for="name">Ritardato:</label>
+          <select id="name" name="choice" required>
             <option value="" disabled selected>Scegli tra sti rincoglioniti</option>
             <option value="andrea">Andrea</option>
             <option value="dario">Dario</option>
@@ -34,14 +34,14 @@
           <div id="inputNote" class="input-note" aria-hidden="true"></div>
 
           <input
-            id="textInput"
+            id="password"
             name="text"
             type="password"
             placeholder="Select an option first..."
             disabled
             required
             aria-hidden="true"
-            autocomplete="new-password"
+            autocomplete="off"
           />
         </div>
 
@@ -50,18 +50,9 @@
 
       <!-- secret content shown after correct password / after initial set -->
       <div id="secretDiv" class="form-group hidden" aria-hidden="true">
-        <div class="result">Accesso consentito — contenuto riservato.</div>
-        <div class="subtitle" style="font-size:0.85rem; margin-top:0.5rem;">
-          Puoi esportare/importare la lista coppie utente‑codice (solo client-side).
-        </div>
-        <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-          <button id="exportBtn" type="button">Export data</button>
-          <button id="importBtn" type="button">Import data</button>
-          <input id="importInput" type="file" accept="application/json" style="display:none" />
-        </div>
-      </div>
+        <button id="goBtn">Dimmi a chi devo fare il regalo</button>
 
-      <div id="result" class="result" aria-live="polite"></div>
+        <div id="result"></div>
     </section>
   </main>
 
