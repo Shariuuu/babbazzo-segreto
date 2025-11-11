@@ -22,27 +22,25 @@
             <option value="dario">Dario</option>
             <option value="stefano">Stefano</option>
             <option value="bruno">Bruno</option>
-            <option value="mocu">Mocu</option>
+            <option value="mocu">Mocu (ou mocu)</option>
             <option value="ciccio">Ciccio</option>
             <option value="ettore">Ettore</option>
             <option value="alessia">Alessia</option>
           </select>
         </div>
 
-        <!-- Text input, enabled after selection -->
-        <div id="inputSection" class="hidden">
-          <div class="form-group">
-            <label for="textInput">Il tuo testo</label>
-            <input
-              id="textInput"
-              name="text"
-              type="text"
-              placeholder="Scrivi qualcosa..."
-              required
-            />
-          </div>
-
-          <button type="submit" id="submitBtn">Invia</button>
+        <!-- Text input, hidden until a selection is made -->
+        <div class="form-group hidden" id="textGroup">
+          <label for="textInput">Your text</label>
+          <input
+            id="textInput"
+            name="text"
+            type="text"
+            placeholder="Select an option first..."
+            disabled
+            required
+            aria-hidden="true"
+          />
         </div>
 
         <button type="submit" id="submitBtn" disabled>Submit</button>
