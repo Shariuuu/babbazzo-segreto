@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputNote = document.getElementById("inputNote");
   const formEl = document.getElementById("mainForm");
   const resultEl = document.getElementById("result");
+  const resultPasswordEl = document.getElementById("resultPassword");
   const resultTextEl = document.getElementById("resultText");
   const submitBtn = document.getElementById("submitBtn");
   const secretDiv = document.getElementById("secretDiv");
@@ -78,7 +79,7 @@ async function decryptAssignment(base64Data, password) {
     key,
     ct
   );
-  return textDecoder.decode(plainBuffer); // es. "Devi fare il regalo a: Elena"
+  return textDecoder.decode(plainBuffer);
 }
 
 document.getElementById("goBtn").addEventListener("click", async () => {
@@ -108,12 +109,11 @@ document.getElementById("goBtn").addEventListener("click", async () => {
     resultTextEl.setAttribute("aria-hidden", "false");
   } catch (e) {
     console.error(e);
-    resultEl.textContent = "Password errata. Ma sai scrivere?";
-    resultEl.className = "error";
+    resultPasswordEl.textContent = "Password errata. Ma sai scrivere? La prima volta giusta e ora no?";
+    resultPasswordEl.className = "error";
   }
 });
 
-  // store users/passwords loaded from users.json
   let usersMap = {};
   let currentUser = "";
 
@@ -128,10 +128,9 @@ document.getElementById("goBtn").addEventListener("click", async () => {
     }
   }
 
-  // initial load
+
   loadUsersFile();
 
-  // reset helper
   function hideInputGroup() {
     inputGroup.classList.add("hidden");
     inputEl.disabled = true;
@@ -141,7 +140,6 @@ document.getElementById("goBtn").addEventListener("click", async () => {
     inputNote.setAttribute("aria-hidden", "true");
   }
 
-  // helper to show/hide result and the resultText paragraph
   function setResult(message = "", isError = false) {
     resultEl.textContent = message;
     if (message) {
@@ -157,16 +155,14 @@ document.getElementById("goBtn").addEventListener("click", async () => {
     }
   }
 
-  // picklist change
   selectEl.addEventListener("change", () => {
     const val = selectEl.value;
     currentUser = val;
     secretDiv.classList.add("hidden");
     secretDiv.setAttribute("aria-hidden", "true");
-    setResult(""); // hide resultText too
+    setResult("");
     resultEl.classList.remove("result--error");
 
-    // ensure submit visible again when selection changes
     submitBtn.classList.remove("hidden");
     submitBtn.style.display = "";
 
@@ -177,12 +173,10 @@ document.getElementById("goBtn").addEventListener("click", async () => {
 
     const hasPassword = Object.prototype.hasOwnProperty.call(usersMap, val);
 
-    // restore custom note text from the notes map (if any) and show status
-    // show custom note on its own line, status on the next line
     const noteText = notes[val] ? notes[val] : "";
     const statusText = hasPassword
       ? "Metti la password che t'ho dato. Tanto lo so che ora devi tornare su whatsapp perchè non te la ricordi, c'hai la memoria di un criceto dio"
-      : "Nessuna password disponibile per questo utente (impossibile impostarne una qui).";
+      : "Nessuna password ";
     if (noteText) {
       inputNote.innerHTML = `${noteText}<br/><br/><br/><span class="note-status">${statusText}</span>`;
     } else {
@@ -190,7 +184,6 @@ document.getElementById("goBtn").addEventListener("click", async () => {
     }
     inputNote.setAttribute("aria-hidden", "false");
 
-    // if there's a password defined in users.json allow the user to input it
     if (hasPassword) {
       inputGroup.classList.remove("hidden");
       inputEl.disabled = false;
@@ -199,13 +192,11 @@ document.getElementById("goBtn").addEventListener("click", async () => {
       submitBtn.disabled = false;
       inputEl.focus();
     } else {
-      // no password defined -> keep input visible but disabled (or hide entirely)
-      // here we show the note but keep the input hidden/disabled
+
       hideInputGroup();
     }
   });
 
-  // form submit -> verify only (no setting)
   formEl.addEventListener("submit", (ev) => {
     ev.preventDefault();
 
@@ -227,18 +218,18 @@ document.getElementById("goBtn").addEventListener("click", async () => {
       return;
     }
 
-    // simple plaintext comparison against users.json entry
+
     const expected = String(usersMap[user]);
     if (code === expected) {
       setResult("Password corretta. Bravo scupino. Ora premi il bottone.", false);
       secretDiv.classList.remove("hidden");
       secretDiv.setAttribute("aria-hidden", "false");
 
-      // hide the submit button to give space to the goBtn
       submitBtn.classList.add("hidden");
       submitBtn.style.display = "none";
     } else {
-      setResult("Password errata. Sei serio?", true);
+      resultPasswordEl.textContent = "Password errata. Sei serio?";
+      resultPasswordEl.classList.add("error");
       secretDiv.classList.add("hidden");
       secretDiv.setAttribute("aria-hidden", "true");
 
