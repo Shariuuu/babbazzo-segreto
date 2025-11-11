@@ -145,8 +145,6 @@ document.getElementById("goBtn").addEventListener("click", async () => {
   function setResult(message = "", isError = false) {
     resultEl.textContent = message;
     if (message) {
-      resultTextEl.classList.remove("hidden");
-      resultTextEl.setAttribute("aria-hidden", "false");
     } else {
       resultTextEl.classList.add("hidden");
       resultTextEl.setAttribute("aria-hidden", "true");
