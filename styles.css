@@ -199,3 +199,17 @@ button:disabled {
   background: #fef2f2;
   color: #b91c1c;
 }
+
+.error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.resultNameClass {
+    font-weight: 800;
+    font-size: 20px;
+    background: linear-gradient(164deg, rgba(255, 0, 0, 1) 0%, rgba(0, 255, 34, 1) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}

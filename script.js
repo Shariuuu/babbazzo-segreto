@@ -105,8 +105,10 @@ document.getElementById("goBtn").addEventListener("click", async () => {
   try {
     const msg = await decryptAssignment(enc, pwd);
     resultEl.textContent = msg;
+    resultEl.classList.add("resultNameClass")
     resultTextEl.classList.remove("hidden");
     resultTextEl.setAttribute("aria-hidden", "false");
+    resultPasswordEl.classList.add("hidden");
   } catch (e) {
     console.error(e);
     resultPasswordEl.textContent = "Password errata. Ma sai scrivere? La prima volta giusta e ora no?";
@@ -224,6 +226,7 @@ document.getElementById("goBtn").addEventListener("click", async () => {
       setResult("Password corretta. Bravo scupino. Ora premi il bottone.", false);
       secretDiv.classList.remove("hidden");
       secretDiv.setAttribute("aria-hidden", "false");
+      resultPasswordEl.classList.add("hidden");
 
       submitBtn.classList.add("hidden");
       submitBtn.style.display = "none";
