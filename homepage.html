@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sample Homepage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+    <section class="card">
+      <h1>Welcome</h1>
+      <p class="subtitle">Select an option and enter some text.</p>
+
+      <form id="mainForm" class="form" autocomplete="off">
+        <!-- Picklist -->
+        <div class="form-group">
+          <label for="choiceSelect">Pick an option</label>
+          <select id="choiceSelect" name="choice" required>
+            <option value="" disabled selected>-- Select an option --</option>
+            <option value="option1">Option 1</option>
+            <option value="option2">Option 2</option>
+            <option value="option3">Option 3</option>
+          </select>
+        </div>
+
+        <!-- Text input, enabled after selection -->
+        <div class="form-group">
+          <label for="textInput">Your text</label>
+          <input
+            id="textInput"
+            name="text"
+            type="text"
+            placeholder="Select an option first..."
+            disabled
+            required
+          />
+        </div>
+
+        <button type="submit" id="submitBtn" disabled>Submit</button>
+      </form>
+
+      <div id="result" class="result" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
