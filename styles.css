@@ -1,4 +1,4 @@
-/* Basic reset */
+/* Reset */
 *,
 *::before,
 *::after {
@@ -8,8 +8,7 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   background: #f5f5f5;
   color: #222;
   min-height: 100vh;
@@ -80,13 +79,12 @@ input[type="text"]:focus {
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
 }
 
-select:disabled,
-input[type="text"]:disabled {
-  background: #f0f0f0;
-  cursor: not-allowed;
+/* Nascondi sezione input inizialmente */
+.hidden {
+  display: none;
 }
 
-/* Button */
+/* Bottone */
 button {
   margin-top: 0.5rem;
   padding: 0.65rem 1rem;
@@ -111,13 +109,7 @@ button:active {
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-/* Result display */
+/* Messaggio risultato */
 .result {
   margin-top: 1.25rem;
   font-size: 0.95rem;
