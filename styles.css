@@ -101,26 +101,52 @@ label {
 }
 
 select,
-input[type="text"] {
+input[type="text"],
+input[type="password"] {
   padding: 0.6rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid #ccc;
+  border: 1px solid #e0e0e0;
   font-size: 0.95rem;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  background: #fff;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+  background: #fafafa;
+  color: #111;
+  width: 100%;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.02);
 }
 
 select:focus,
-input[type="text"]:focus {
+input[type="text"]:focus,
+input[type="password"]:focus {
   border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
 }
 
 select:disabled,
-input[type="text"]:disabled {
-  background: #f0f0f0;
+input[type="text"]:disabled,
+input[type="password"]:disabled {
+  background: #f5f7fa;
   cursor: not-allowed;
+  color: #777;
+}
+
+/* make password input feel like a compact, secure field */
+input[type="password"] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+  letter-spacing: 0.2em; /* obscures visible characters slightly */
+  -webkit-text-security: disc; /* iOS/Chrome fallback for masked characters */
+}
+
+/* placeholder styling */
+input::placeholder {
+  color: #98a0aa;
+  opacity: 1;
+}
+
+/* ensure input fits card layout */
+.form-group input,
+.form-group select {
+  box-sizing: border-box;
 }
 
 /* Button */
