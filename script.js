@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputNote = document.getElementById("inputNote");
   const formEl = document.getElementById("mainForm");
   const resultEl = document.getElementById("result");
-  const resultTextEl = document.getElementById("resultText"); // <-- new
+  const resultTextEl = document.getElementById("resultText");
   const submitBtn = document.getElementById("submitBtn");
   const secretDiv = document.getElementById("secretDiv");
 
@@ -89,7 +89,7 @@ document.getElementById("goBtn").addEventListener("click", async () => {
   resultEl.className = "";
 
   if (!name || !pwd) {
-    resultEl.textContent = "Compila nome e password. Si, la devi rimettere, non rompere i coglioni";
+    resultEl.textContent = "Metti la password. Si, la devi rimettere, non rompere i coglioni";
     resultEl.className = "error";
     return;
   }
@@ -104,9 +104,11 @@ document.getElementById("goBtn").addEventListener("click", async () => {
   try {
     const msg = await decryptAssignment(enc, pwd);
     resultEl.textContent = msg;
+    resultTextEl.classList.remove("hidden");
+    resultTextEl.setAttribute("aria-hidden", "false");
   } catch (e) {
     console.error(e);
-    resultEl.textContent = "Password errata o dati corrotti.";
+    resultEl.textContent = "Password errata. Ma sai scrivere?";
     resultEl.className = "error";
   }
 });
@@ -230,7 +232,7 @@ document.getElementById("goBtn").addEventListener("click", async () => {
     // simple plaintext comparison against users.json entry
     const expected = String(usersMap[user]);
     if (code === expected) {
-      setResult("Password corretta. Bravo scupino.", false);
+      setResult("Password corretta. Bravo scupino. Ora premi il bottone.", false);
       secretDiv.classList.remove("hidden");
       secretDiv.setAttribute("aria-hidden", "false");
 
