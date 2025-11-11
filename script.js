@@ -88,7 +88,7 @@ document.getElementById("goBtn").addEventListener("click", async () => {
   resultEl.className = "";
 
   if (!name || !pwd) {
-    resultEl.textContent = "Compila nome e password.";
+    resultEl.textContent = "Compila nome e password. Si, la devi rimettere, non rompere i coglioni";
     resultEl.className = "error";
     return;
   }
@@ -212,11 +212,11 @@ document.getElementById("goBtn").addEventListener("click", async () => {
     // simple plaintext comparison against users.json entry
     const expected = String(usersMap[user]);
     if (code === expected) {
-      resultEl.textContent = "Password corretta. Accesso consentito.";
+      resultEl.textContent = "Password corretta. Bravo scupino.";
       secretDiv.classList.remove("hidden");
       secretDiv.setAttribute("aria-hidden", "false");
     } else {
-      resultEl.textContent = "Password errata.";
+      resultEl.textContent = "Password errata. Sei serio?";
       resultEl.classList.add("result--error");
       secretDiv.classList.add("hidden");
       secretDiv.setAttribute("aria-hidden", "true");
