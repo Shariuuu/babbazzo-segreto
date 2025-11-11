@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputNote = document.getElementById("inputNote");
   const formEl = document.getElementById("mainForm");
   const resultEl = document.getElementById("result");
+  const resultTextEl = document.getElementById("resultText"); // <-- new
   const submitBtn = document.getElementById("submitBtn");
   const secretDiv = document.getElementById("secretDiv");
 
@@ -138,14 +139,36 @@ document.getElementById("goBtn").addEventListener("click", async () => {
     inputNote.setAttribute("aria-hidden", "true");
   }
 
+  // helper to show/hide result and the resultText paragraph
+  function setResult(message = "", isError = false) {
+    resultEl.textContent = message;
+    if (message) {
+      resultTextEl.classList.remove("hidden");
+      resultTextEl.setAttribute("aria-hidden", "false");
+    } else {
+      resultTextEl.classList.add("hidden");
+      resultTextEl.setAttribute("aria-hidden", "true");
+    }
+
+    if (isError) {
+      resultEl.classList.add("result--error");
+    } else {
+      resultEl.classList.remove("result--error");
+    }
+  }
+
   // picklist change
   selectEl.addEventListener("change", () => {
     const val = selectEl.value;
     currentUser = val;
     secretDiv.classList.add("hidden");
     secretDiv.setAttribute("aria-hidden", "true");
-    resultEl.textContent = "";
+    setResult(""); // hide resultText too
     resultEl.classList.remove("result--error");
+
+    // ensure submit visible again when selection changes
+    submitBtn.classList.remove("hidden");
+    submitBtn.style.display = "";
 
     if (!val) {
       hideInputGroup();
@@ -185,41 +208,42 @@ document.getElementById("goBtn").addEventListener("click", async () => {
   // form submit -> verify only (no setting)
   formEl.addEventListener("submit", (ev) => {
     ev.preventDefault();
-    resultEl.classList.remove("result--error");
-    resultEl.textContent = "";
 
     const user = currentUser;
     const code = inputEl.value;
 
     if (!user) {
-      resultEl.textContent = "Seleziona un utente.";
-      resultEl.classList.add("result--error");
+      setResult("Seleziona un utente.", true);
       return;
     }
 
     if (!Object.prototype.hasOwnProperty.call(usersMap, user)) {
-      resultEl.textContent = "Questo utente non ha una password nel file users.json.";
-      resultEl.classList.add("result--error");
+      setResult("Questo utente non ha una password nel file users.json.", true);
       return;
     }
 
     if (!code) {
-      resultEl.textContent = "Inserisci la password.";
-      resultEl.classList.add("result--error");
+      setResult("Inserisci la password.", true);
       return;
     }
 
     // simple plaintext comparison against users.json entry
     const expected = String(usersMap[user]);
     if (code === expected) {
-      resultEl.textContent = "Password corretta. Bravo scupino.";
+      setResult("Password corretta. Bravo scupino.", false);
       secretDiv.classList.remove("hidden");
       secretDiv.setAttribute("aria-hidden", "false");
+
+      // hide the submit button to give space to the goBtn
+      submitBtn.classList.add("hidden");
+      submitBtn.style.display = "none";
     } else {
-      resultEl.textContent = "Password errata. Sei serio?";
-      resultEl.classList.add("result--error");
+      setResult("Password errata. Sei serio?", true);
       secretDiv.classList.add("hidden");
       secretDiv.setAttribute("aria-hidden", "true");
+
+      submitBtn.classList.remove("hidden");
+      submitBtn.style.display = "";
     }
 
     inputEl.value = "";

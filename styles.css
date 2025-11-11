@@ -122,8 +122,8 @@ input[type="password"] {
 select:focus,
 input[type="text"]:focus,
 input[type="password"]:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+  border-color: #dc2626; /* changed from blue to red */
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08); /* red shadow */
 }
 
 select:disabled,
@@ -162,20 +162,20 @@ button {
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  background: #2563eb;
+  background: #dc2626; /* changed from blue to red */
   color: #fff;
   transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.15s ease;
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.35); /* red shadow */
 }
 
 button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.45);
+  box-shadow: 0 10px 22px rgba(220, 38, 38, 0.45); /* red shadow */
 }
 
 button:active {
   transform: translateY(0);
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.4); /* red shadow */
 }
 
 button:disabled {
@@ -190,8 +190,8 @@ button:disabled {
   font-size: 0.95rem;
   padding: 0.75rem 1rem;
   border-radius: 0.6rem;
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #fff1f2; /* changed from light blue to light red/pink */
+  color: #b91c1c; /* changed from blue to dark red */
   min-height: 1em;
 }
 
