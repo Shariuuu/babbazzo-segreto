@@ -22,14 +22,14 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const encryptedAssignments = {
-  "andrea": "PlE28l83p8qIg6DlzxVqvA9mPuG/wrgGrphVA/uIB+HnL5s27x2ES7PhfLlkhPp9NN0ZW3/ha/h76zvoqeS3x0IjOpb7DLhQ",
-  "dario": "vn2uyeXC53eOFMMUJN9gcyGr/XrBOyuNSYP/dCtFVZFX//93yyBqzoK5RKziyvCguURTX645Iwo9v2ZqFWQUY5p962q5EKtkyA==",
-  "stefano": "teu5fhzXU/N7ip9Tm0AzE+Je1t1EsTWM7dqjULai7Z7a0P1bHts2GBTNpj3v3WMAZO94ysyFRYuSG2LHb9SIvDvn/4nUd/fs",
-  "bruno": "Ok7Amrr6dvuoClZoSfMnZSAQPOzwk+i2WndHKecBDZWGLvDAXolguxVurtxrZyNVQrkFJ2WHucPZUi0lnmoTEMoNYkr9b7B9DA==",
-  "mocu": "36sZCio0TQhOe3vvl/zXKjEcnVXo8kRvbJB78HwlZ+qpRxJGmjtGHvN8YPJEvlBl//CY13teqnFDvScVqKO9pXwu6LT4HpmASw==",
-  "ciccio": "sb/HNUmpJScwS7Uv66+3yLJPmWO1JYeHKj599Iah8jnSNtoANvY63nGPA6iIC/n0FXxR2PjD1l1cl6L4s1fTCx9Q/NrOBlXTzBw=",
-  "ettore": "11nXZP6ltZZOdwO01MERsRA44YsFyBrqIGEVtMMUzUOU7u4YoeRR9FbD6kmIxqDvufWHQUazPmdupuob7HGRtmYc/d4t+qdDhY4=",
-  "alessia": "N75slmPX8W7KC4b0R8BmFCimvrismN+0flo7yXnsd0vAzW4X43nZp7/vPMT2d/jJZdU9b9eDlhsy+ek2RZjzVQ7rxWOidzQ="
+  "andrea": "lSi3IkKW0WTjyKEzoGYy4N3Wnm3+5JLKDWhlwlYVmVSExlABiEdn1n5XU2zBqC1QisU=",
+  "dario": "uN9XwN0iY+dP5cbkyXrmEXcQwzNhXFyF+UciedAothoXUFnrbcadHYklT0JrrKJz/RjB",
+  "stefano": "gv/KOuG32sM8p1IcDfxbyaAOfaiYMjhtEL08OlIIw9+3SNbZiEuTJc1dREQg9BMLUfw=",
+  "bruno": "/Y//53m2z7M1fPQDI3yeCeG4N6Xp/P8agoUSO++eFoV1QZSz7XxezD70PBDDnzmgEqYZ",
+  "mocu": "RRW/ZbyBqKFAV54qhtO6prd4zTbBKj4fK3CgZyg2OLXkRyW8NmWgJzujNdWhd+xNHw==",
+  "ciccio": "R25Xpevo+oekfNwrMq3j53/9rd6+dyD+ZFtR9m/3ipkQfTvQvkXQl34R/MQebTOISw==",
+  "ettore": "efsd+ILrXrE7OvT0Vkt8A6+dfSMwWyweKP7ibLVvhUyb60lrsOY0AlSVDVF3XOQh",
+  "alessia": "tehb6xUgRQqQwCI+K2YXqPdS6j4Q3hHFadwyu2NbYTeFyOLmafIH08Cto1nCieiqiB8="
 };
 
 const textEncoder = new TextEncoder();
@@ -117,6 +117,7 @@ document.getElementById("goBtn").addEventListener("click", async () => {
 });
 
   let usersMap = {};
+  let usersLoaded = false;
   let currentUser = "";
 
   async function loadUsersFile() {
@@ -124,14 +125,36 @@ document.getElementById("goBtn").addEventListener("click", async () => {
       const res = await fetch("users.json", { cache: "no-store" });
       if (!res.ok) throw new Error("not found");
       usersMap = await res.json();
+      usersLoaded = true;
     } catch {
       usersMap = {};
-      console.warn("err pass");
+      usersLoaded = false;
+      console.warn("users.json non caricato: uso la verifica tramite decifratura");
     }
   }
 
+  const usersReady = loadUsersFile();
 
-  loadUsersFile();
+  // Un utente "ha una password" se è in users.json oppure ha un'assegnazione cifrata
+  function userHasPassword(user) {
+    return Object.prototype.hasOwnProperty.call(usersMap, user) ||
+      Object.prototype.hasOwnProperty.call(encryptedAssignments, user);
+  }
+
+  // Verifica la password: users.json se disponibile, altrimenti prova a decifrare
+  async function checkPassword(user, code) {
+    if (usersLoaded && Object.prototype.hasOwnProperty.call(usersMap, user)) {
+      return code === String(usersMap[user]);
+    }
+    const enc = encryptedAssignments[user];
+    if (!enc) return false;
+    try {
+      await decryptAssignment(enc, code);
+      return true;
+    } catch {
+      return false;
+    }
+  }
 
   function hideInputGroup() {
     inputGroup.classList.add("hidden");
@@ -173,7 +196,7 @@ document.getElementById("goBtn").addEventListener("click", async () => {
       return;
     }
 
-    const hasPassword = Object.prototype.hasOwnProperty.call(usersMap, val);
+    const hasPassword = userHasPassword(val);
 
     const noteText = notes[val] ? notes[val] : "";
     const statusText = hasPassword
@@ -199,8 +222,10 @@ document.getElementById("goBtn").addEventListener("click", async () => {
     }
   });
 
-  formEl.addEventListener("submit", (ev) => {
+  formEl.addEventListener("submit", async (ev) => {
     ev.preventDefault();
+
+    await usersReady;
 
     const user = currentUser;
     const code = inputEl.value;
@@ -210,8 +235,8 @@ document.getElementById("goBtn").addEventListener("click", async () => {
       return;
     }
 
-    if (!Object.prototype.hasOwnProperty.call(usersMap, user)) {
-      setResult("Questo utente non ha una password nel file users.json.", true);
+    if (!userHasPassword(user)) {
+      setResult("Questo utente non ha una password.", true);
       return;
     }
 
@@ -220,9 +245,12 @@ document.getElementById("goBtn").addEventListener("click", async () => {
       return;
     }
 
+    submitBtn.disabled = true;
+    const ok = await checkPassword(user, code);
+    submitBtn.disabled = false;
 
-    const expected = String(usersMap[user]);
-    if (code === expected) {
+    if (ok) {
+      resultPasswordEl.textContent = "";
       setResult("Password corretta. Bravo scupino. Ora premi il bottone.", false);
       secretDiv.classList.remove("hidden");
       secretDiv.setAttribute("aria-hidden", "false");

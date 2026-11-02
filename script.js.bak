@@ -1,0 +1,274 @@
+document.addEventListener("DOMContentLoaded", () => {
+  const selectEl = document.getElementById("name");
+  const inputEl = document.getElementById("password");
+  const inputGroup = document.getElementById("textGroup");
+  const inputNote = document.getElementById("inputNote");
+  const formEl = document.getElementById("mainForm");
+  const resultEl = document.getElementById("result");
+  const resultPasswordEl = document.getElementById("resultPassword");
+  const resultTextEl = document.getElementById("resultText");
+  const submitBtn = document.getElementById("submitBtn");
+  const secretDiv = document.getElementById("secretDiv");
+
+  const notes = {
+    andrea: "Perchè hai scelto me? Che cazzo vuoi? Scegli il tuo nome e levati dalle palle",
+    dario: "A zi guarda che bello fare front end dio cane",
+    stefano: "Avvocato speriamo che Lautaro si fa il crociato",
+    bruno: "Ah, Bruno, il macinapepe degli dei. Leggende narrano che abbia sgrullato le palle anche a Crono, e per quello fu segregato nel Tartaro. Gasi.",
+    mocu: "ou mocu, t'appost? Ti ho visto al telegiornale, freschissimo",
+    ciccio: "Francese del cazzo. Tra l'altro Francese e Francesco sono molto simili. Magari avere il culo sporco era il tuo destino?",
+    ettore: "Il compare, grande sognatore di totalitarismi e pulizia etnica. Certo, poi quando segna Zambo Anguissa gode. La coerenza...",
+    alessia: "Si, ti ho messa per ultima perchè le femmine stanno in fondo. Stacci."
+  };
+
+  const encryptedAssignments = {
+  "andrea": "iE/nmxesdVNQx5ubnys0TjDPbWUufGI5ESTkq1rxYykwbdeEg9mj7/kYab4aNg91EbVL",
+  "dario": "X87JvqggxODHY00iS/YcMyqfQwyt8DXjvEGf05QHLPJVmlcGVF/Vi9te7VI7zaJT",
+  "stefano": "drSmKYdGupQ3BPXMnOdVyUwS8Pt3dMNUQn1SuwLZoi9qBg4qv6znzWvVKRz9nMjcsfw=",
+  "bruno": "FO9QkfpBpV4UbiBGz9VippMLu4BsKUlLOW7sfmXFyY+nStEu2NwPJq2/jRMac+y7xR0=",
+  "mocu": "NKCBOGxZ6GPiWf2+XXkweOZy7NSgxOHWReEnfOnPF9qXGR+l3MKlJz8+h1Q5PWIoAsU=",
+  "ciccio": "nIDkMKhVmQYS/6gx7OqrypBO4Iym6FbGcFhVgl2QjtuEdlTMrsuNFD7ut0bpDF3jQC8C",
+  "ettore": "DXz3n2ogIxcIWGo9S2SOAwkFQ6HkYj5/S89uwsDIyUMk8qdmtrQVbQEQWrrIff80Qw==",
+  "alessia": "aBJ5CluVFRrk9MGvpAfUwYCWI9AWlC1XrwcMOFGza4v6Z1JqgqBsRuyHXSK4/OnMFQ=="
+};
+
+const textEncoder = new TextEncoder();
+const textDecoder = new TextDecoder();
+
+function base64ToBytes(b64) {
+  const binStr = atob(b64);
+  const bytes = new Uint8Array(binStr.length);
+  for (let i = 0; i < binStr.length; i++) {
+    bytes[i] = binStr.charCodeAt(i);
+  }
+  return bytes;
+}
+
+async function deriveKeyFromPassword(password, salt) {
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    textEncoder.encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveKey"]
+  );
+  const key = await crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt,
+      iterations: 200000,
+      hash: "SHA-256"
+    },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt"]
+  );
+  return key;
+}
+
+async function decryptAssignment(base64Data, password) {
+  const data = base64ToBytes(base64Data);
+  const salt = data.slice(0, 16);
+  const iv   = data.slice(16, 28);
+  const ct   = data.slice(28);
+
+  const key = await deriveKeyFromPassword(password, salt);
+  const plainBuffer = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv },
+    key,
+    ct
+  );
+  return textDecoder.decode(plainBuffer);
+}
+
+document.getElementById("goBtn").addEventListener("click", async () => {
+  const name = document.getElementById("name").value;
+  const pwd  = document.getElementById("password").value;
+  const resultEl = document.getElementById("result");
+  resultEl.textContent = "";
+  resultEl.className = "";
+
+  if (!name || !pwd) {
+    resultEl.textContent = "Metti la password. Si, la devi rimettere, non rompere i coglioni";
+    resultEl.className = "error";
+    return;
+  }
+
+  const enc = encryptedAssignments[name];
+  if (!enc) {
+    resultEl.textContent = "Nome non valido.";
+    resultEl.className = "error";
+    return;
+  }
+
+  try {
+    const msg = await decryptAssignment(enc, pwd);
+    resultEl.textContent = msg;
+    resultEl.classList.add("resultNameClass")
+    resultTextEl.classList.remove("hidden");
+    resultTextEl.setAttribute("aria-hidden", "false");
+    resultPasswordEl.classList.add("hidden");
+  } catch (e) {
+    console.error(e);
+    resultPasswordEl.textContent = "Password errata. Ma sai scrivere? La prima volta giusta e ora no?";
+    resultPasswordEl.className = "error";
+  }
+});
+
+  let usersMap = {};
+  let usersLoaded = false;
+  let currentUser = "";
+
+  async function loadUsersFile() {
+    try {
+      const res = await fetch("users.json", { cache: "no-store" });
+      if (!res.ok) throw new Error("not found");
+      usersMap = await res.json();
+      usersLoaded = true;
+    } catch {
+      usersMap = {};
+      usersLoaded = false;
+      console.warn("users.json non caricato: uso la verifica tramite decifratura");
+    }
+  }
+
+  const usersReady = loadUsersFile();
+
+  // Un utente "ha una password" se è in users.json oppure ha un'assegnazione cifrata
+  function userHasPassword(user) {
+    return Object.prototype.hasOwnProperty.call(usersMap, user) ||
+      Object.prototype.hasOwnProperty.call(encryptedAssignments, user);
+  }
+
+  // Verifica la password: users.json se disponibile, altrimenti prova a decifrare
+  async function checkPassword(user, code) {
+    if (usersLoaded && Object.prototype.hasOwnProperty.call(usersMap, user)) {
+      return code === String(usersMap[user]);
+    }
+    const enc = encryptedAssignments[user];
+    if (!enc) return false;
+    try {
+      await decryptAssignment(enc, code);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function hideInputGroup() {
+    inputGroup.classList.add("hidden");
+    inputEl.disabled = true;
+    inputEl.value = "";
+    submitBtn.disabled = true;
+    inputNote.textContent = "";
+    inputNote.setAttribute("aria-hidden", "true");
+  }
+
+  function setResult(message = "", isError = false) {
+    resultEl.textContent = message;
+    if (message) {
+    } else {
+      resultTextEl.classList.add("hidden");
+      resultTextEl.setAttribute("aria-hidden", "true");
+    }
+
+    if (isError) {
+      resultEl.classList.add("result--error");
+    } else {
+      resultEl.classList.remove("result--error");
+    }
+  }
+
+  selectEl.addEventListener("change", () => {
+    const val = selectEl.value;
+    currentUser = val;
+    secretDiv.classList.add("hidden");
+    secretDiv.setAttribute("aria-hidden", "true");
+    setResult("");
+    resultEl.classList.remove("result--error");
+
+    submitBtn.classList.remove("hidden");
+    submitBtn.style.display = "";
+
+    if (!val) {
+      hideInputGroup();
+      return;
+    }
+
+    const hasPassword = userHasPassword(val);
+
+    const noteText = notes[val] ? notes[val] : "";
+    const statusText = hasPassword
+      ? "Metti la password che t'ho dato. Tanto lo so che ora devi tornare su whatsapp perchè non te la ricordi, c'hai la memoria di un criceto dio"
+      : "Nessuna password ";
+    if (noteText) {
+      inputNote.innerHTML = `${noteText}<br/><br/><br/><span class="note-status">${statusText}</span>`;
+    } else {
+      inputNote.textContent = statusText;
+    }
+    inputNote.setAttribute("aria-hidden", "false");
+
+    if (hasPassword) {
+      inputGroup.classList.remove("hidden");
+      inputEl.disabled = false;
+      inputEl.value = "";
+      inputEl.placeholder = "Ti sbrighi?";
+      submitBtn.disabled = false;
+      inputEl.focus();
+    } else {
+
+      hideInputGroup();
+    }
+  });
+
+  formEl.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+
+    await usersReady;
+
+    const user = currentUser;
+    const code = inputEl.value;
+
+    if (!user) {
+      setResult("Seleziona un utente.", true);
+      return;
+    }
+
+    if (!userHasPassword(user)) {
+      setResult("Questo utente non ha una password.", true);
+      return;
+    }
+
+    if (!code) {
+      setResult("Inserisci la password.", true);
+      return;
+    }
+
+    submitBtn.disabled = true;
+    const ok = await checkPassword(user, code);
+    submitBtn.disabled = false;
+
+    if (ok) {
+      resultPasswordEl.textContent = "";
+      setResult("Password corretta. Bravo scupino. Ora premi il bottone.", false);
+      secretDiv.classList.remove("hidden");
+      secretDiv.setAttribute("aria-hidden", "false");
+      resultPasswordEl.classList.add("hidden");
+
+      submitBtn.classList.add("hidden");
+      submitBtn.style.display = "none";
+    } else {
+      resultPasswordEl.textContent = "Password errata. Sei serio?";
+      resultPasswordEl.classList.add("error");
+      secretDiv.classList.add("hidden");
+      secretDiv.setAttribute("aria-hidden", "true");
+
+      submitBtn.classList.remove("hidden");
+      submitBtn.style.display = "";
+    }
+
+    inputEl.value = "";
+    inputEl.focus();
+  });
+});

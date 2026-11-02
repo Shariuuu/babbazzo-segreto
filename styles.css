@@ -66,7 +66,7 @@ h1 {
   /* allow smooth fade / slide animation */
   transition: opacity 200ms ease, transform 200ms ease, max-height 220ms ease, visibility 200ms;
   will-change: opacity, transform, max-height;
-  max-height: 220px; /* enough for the label + input */
+  max-height: 1000px; /* abbastanza per note lunghe + input (il valore serve solo per l'animazione) */
   overflow: hidden;
 }
 
