@@ -141,11 +141,9 @@ document.getElementById("goBtn").addEventListener("click", async () => {
       Object.prototype.hasOwnProperty.call(encryptedAssignments, user);
   }
 
-  // Verifica la password: users.json se disponibile, altrimenti prova a decifrare
+  // Verifica la password provando a decifrare l'abbinamento: stessa prova del bottone finale,
+  // così le due verifiche non possono mai dare risultati diversi
   async function checkPassword(user, code) {
-    if (usersLoaded && Object.prototype.hasOwnProperty.call(usersMap, user)) {
-      return code === String(usersMap[user]);
-    }
     const enc = encryptedAssignments[user];
     if (!enc) return false;
     try {
